@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/bwoil/erase-game/utils/syncx"
+	"github.com/lgynico/gokit/syncx"
 )
 
 type Logger struct {
