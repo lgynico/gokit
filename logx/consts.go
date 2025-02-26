@@ -29,6 +29,23 @@ func levelString(l Level) string {
 	}
 }
 
+func levelColor(l Level) string {
+	switch l {
+	case LevelDebug:
+		return "\033[0;34m%s\033[0m"
+	case LevelInfo:
+		return "\033[0;32m%s\033[0m"
+	case LevelWarn:
+		return "\033[0;33m%s\033[0m"
+	case LevelError:
+		return "\033[0;31m%s\033[0m"
+	case LevelFatal:
+		return "\033[0;31m%s\033[0m"
+	default:
+		return "%s"
+	}
+}
+
 type ScrollSize int
 
 const (

@@ -7,12 +7,20 @@ import (
 )
 
 func TestLogger(t *testing.T) {
-	logger := New(WithScrollSize(ScrollSize_1MB), WithConsoleOutput(false), WithScrollTime(scrollTime_Test))
+	logger := New(
+		WithScrollSize(ScrollSize_1MB),
+		WithConsoleOutput(true),
+		WithScrollTime(scrollTime_Test),
+		WithLevel(LevelDebug),
+	)
 	msg := "adsfasdfasdfasdiofjaosidfjoasjdfojoisdjfoijsdfjoisajdofjsiodfj"
 	for {
-		logger.Info("%s", msg)
+		logger.Info(msg)
+		logger.Debug(msg)
+		logger.Error(msg)
+		logger.Warn(msg)
 
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(time.Second)
 	}
 
 }

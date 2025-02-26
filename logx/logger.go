@@ -6,19 +6,28 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/lgynico/gokit/syncx"
 )
 
-type Logger struct {
-	o        Option
-	output   *os.File
-	sig      *syncx.Signal
-	lastTime time.Time
-	counter  int
-	logC     chan string
-}
+type (
+	Logger struct {
+		o        Option
+		output   *os.File
+		sig      *syncx.Signal
+		lastTime time.Time
+		counter  int
+		logC     chan *message
+		pool     sync.Pool
+	}
+
+	message struct {
+		level Level
+		value string
+	}
+)
 
 func New(opts ...OptionFunc) *Logger {
 	o := defaultOption()
@@ -47,7 +56,8 @@ func New(opts ...OptionFunc) *Logger {
 		output:   output,
 		sig:      syncx.NewSignal(),
 		lastTime: timeTruncate(o.ScrollTime),
-		logC:     make(chan string, 1024),
+		logC:     make(chan *message, 1024),
+		pool:     sync.Pool{New: func() any { return &message{} }},
 	}
 
 	go logger.start()
@@ -88,7 +98,10 @@ func (p *Logger) log(level Level, format string, v ...any) {
 		msg,
 	)
 
-	p.logC <- msg
+	wrapper := p.pool.Get().(*message)
+	wrapper.level = level
+	wrapper.value = msg
+	p.logC <- wrapper
 }
 
 func (p *Logger) start() {
@@ -131,13 +144,15 @@ loop:
 
 }
 
-func (p *Logger) write(msg string) {
+func (p *Logger) write(msg *message) {
+	defer p.pool.Put(msg)
+
 	if p.o.ConsoleOutput {
-		os.Stdout.WriteString(msg)
+		os.Stdout.WriteString(fmt.Sprintf(levelColor(msg.level), msg.value))
 	}
 
 	if p.output != nil {
-		p.output.WriteString(msg)
+		p.output.WriteString(msg.value)
 		p.output.Sync()
 		if p.o.ScrollSize != ScrollSize_None {
 			fi, _ := p.output.Stat()

@@ -6,8 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bwoil/erase-game/app"
-	"github.com/bwoil/erase-game/utils/cryptox"
+	"github.com/lgynico/gokit/cryptox"
 )
 
 func TestHS256(t *testing.T) {
@@ -38,7 +37,7 @@ func TestHS256Decode(t *testing.T) {
 		"username": "nico",
 	}
 
-	token, err := HmacSha256(app.GameContext.SignKey(), claim)
+	token, err := HmacSha256([]byte("ILoveGames"), claim)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -46,7 +45,7 @@ func TestHS256Decode(t *testing.T) {
 	fmt.Println(token)
 	// token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoibmljbzAwMSJ9.I_YYDzp39dw6r2bMm8jagZmCXXttEnY3Ww8r8MOIeWQ"
 
-	m, err := Decode(app.GameContext.SignKey(), token)
+	m, err := Decode([]byte("ILoveGames"), token)
 	if err != nil {
 		t.Fatal(err)
 	}
