@@ -28,6 +28,10 @@ func (p *Client) Ping() error {
 	return p.client.Ping(context.TODO()).Err()
 }
 
+func (p *Client) Redis() *redis.Client {
+	return &p.client
+}
+
 func (p *Client) Set(key string, value any) (string, error) {
 	return p.client.Set(context.TODO(), key, value, 0).Result()
 }
