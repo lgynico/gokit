@@ -35,13 +35,27 @@ func (p *Collection) InsertMany(documents ...any) ([]string, error) {
 	return ids, nil
 }
 
+func (p *Collection) UpdateInsert(filter, update any) (string, error) {
+	result, err := p.c.UpdateOne(context.TODO(), filter, update,
+		options.Update().SetUpsert(true))
+	if err != nil {
+		return "", err
+	}
+
+	if result.UpsertedID != nil {
+		return result.UpsertedID.(primitive.ObjectID).Hex(), nil
+	}
+
+	return "", nil
+}
+
 func (p *Collection) Update(id string, document any) error {
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return err
 	}
 
-	_, err = p.c.UpdateOne(context.Background(), bson.M{"_id": objectID}, bson.M{"$set": document})
+	_, err = p.c.UpdateByID(context.Background(), objectID, bson.M{"$set": document})
 	if err != nil {
 		return err
 	}
