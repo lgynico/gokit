@@ -122,6 +122,18 @@ func (p *Collection) Find(filter any, results any, fields ...string) error {
 	return cursor.All(context.TODO(), results)
 }
 
+func (p *Collection) RawFind(filter bson.M, results any, opts *options.FindOptions) error {
+	cursor, err := p.c.Find(context.TODO(), filter, opts)
+	if err != nil {
+		if !errors.Is(err, mongo.ErrNoDocuments) {
+			return nil
+		}
+		return err
+	}
+
+	return cursor.All(context.TODO(), results)
+}
+
 func (p *Collection) DeleteOne(filter any) (bool, error) {
 	result, err := p.c.DeleteOne(context.TODO(), filter)
 	if err != nil {

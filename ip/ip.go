@@ -2,22 +2,26 @@ package ip
 
 import (
 	"strings"
+	"sync"
 
 	"github.com/lionsoul2014/ip2region/binding/golang/xdb"
 )
 
 var searcher *xdb.Searcher
+var once sync.Once
 
-func init() {
-	vi, err := xdb.LoadVectorIndexFromFile("./ip2region.xdb")
-	if err != nil {
-		panic(err)
-	}
+func Init(dbPath string) error {
+	var err error
+	once.Do(func() {
+		var vi []byte
+		vi, err = xdb.LoadVectorIndexFromFile(dbPath)
+		if err != nil {
+			return
+		}
 
-	searcher, err = xdb.NewWithVectorIndex("./ip2region.xdb", vi)
-	if err != nil {
-		panic(err)
-	}
+		searcher, err = xdb.NewWithVectorIndex(dbPath, vi)
+	})
+	return err
 }
 
 func GetRegion(ip string) (*Region, error) {
